@@ -8,7 +8,9 @@ export const DUMMY_PATIENTS = [
         province: 'Dolnośląskie',
         zipCode: '58-560',
         phoneNumber:'607 411 432',
-        email:'DUMNY_EMAIL@DUMNY_DOMAIN.COM',
+        email:'kuba-projekt@wp.pl',
+        birthDay:'2023-04-04',
+        birthPlace:'Jelenia Góra',
         children:[
             {
                 id: 'c1',

@@ -1,6 +1,9 @@
 import { Fragment, useState } from 'react'
 import { useSelector,useDispatch } from 'react-redux'
 
+import { useFormData } from '../../../../../hooks/useFormData'
+import CheckFormIsValid from '../../../../../assets/Validation/CheckFormIsValid'
+
 import { ClearForm } from '../../../../../context/slices/AddPatientForm'
 import { OverlayToggle } from '../../../../../context/slices/OverlayModel_SLICE'
 
@@ -9,14 +12,21 @@ import ChildrenForm from './ChildrenForm/ChildrenForm'
 import Popup from '../../../../utility/Popup'
 
 
-const PatientAddingForm = () => {
+const PatientAddingForm = ({activePatient}) => {
+
+    const defaultChildrenList = activePatient ? activePatient.children : []
 
     const [formMode,setFormMode] = useState('patient')
-    const [childrenList, setChildrenList] = useState([])
-    const PatientInputs = useSelector(state => state.addPatientForm.patientInputs)
+    const [childrenList, setChildrenList] = useState(defaultChildrenList)
+    const getValue = useFormData();
     const dispatch = useDispatch()
 
-    const {firstName,lastName,birthDay,birthPlace,phoneNumber,email,province,city,address,zipCode} = PatientInputs
+    const PatientContextInputs = useSelector(state => state.addPatientForm.patientInputs)
+    const PatientInputs = (activePatient != undefined) ? activePatient : getValue(PatientContextInputs) 
+
+    const {firstName,lastName,birthDay,birthPlace,phoneNumber,email,province,city,address,zipCode} = PatientContextInputs
+
+    const formIsValid = CheckFormIsValid(PatientContextInputs)
 
     const FormModeChangeHandler = (mode) => {
         setFormMode(mode)
@@ -43,6 +53,7 @@ const PatientAddingForm = () => {
         }
 
         console.log(newPatient)
+
         setFormMode('success')
         dispatch(ClearForm())
 
@@ -60,20 +71,23 @@ const PatientAddingForm = () => {
 
     const RemoveChildrenFromListHandler = (childrenId) =>  {
         setChildrenList((previousState) => {
-            const newChildrenList = previousState.filter(children => (childrenId !== children.listId))
+            const newChildrenList = previousState.filter(children => (childrenId !== children.id))
             return newChildrenList
         })
     }
 
+    const FormClearHandler = () => {
+        console.log('dzialam')
+        dispatch(ClearForm())
+    }
+
     return (
         <Fragment>
-            {formMode === 'patient' && <PatientForm changeFormMode={FormModeChangeHandler} RemoveChildrenFromList={RemoveChildrenFromListHandler} 
-                                                    childrenList={childrenList} AddNewPatient={AddNewPatientHandler} />}
+            {formMode === 'patient' && <PatientForm changeFormMode={FormModeChangeHandler} RemoveChildrenFromList={RemoveChildrenFromListHandler} childrenList={childrenList} AddNewPatient={AddNewPatientHandler} PatientInputs={PatientInputs} formIsValid={formIsValid} onFormClose={FormClearHandler} />}
                                                     
             {formMode === 'children' && <ChildrenForm changeFormMode={FormModeChangeHandler} AddChildrenToList={AddChildrenToListHandler} />}
 
-            {formMode === 'childrenWarning' && <Popup type='warning' description="Czy napewno chcesz dodać pacjenta z pustą listą przypisanych noworodków ?" 
-                                                    CancleAction={()=>setFormMode('children')} AcceptAction={()=>AddNewPatientHandler()} /> }
+            {formMode === 'childrenWarning' && <Popup type='warning' description="Czy napewno chcesz dodać pacjenta z pustą listą przypisanych noworodków ?" CancleAction={()=>setFormMode('children')} AcceptAction={()=>AddNewPatientHandler()} /> }
 
             {formMode === 'success' && <Popup type='success' description="Pacjent został dodany pomyślnie"  AcceptAction={()=>dispatch(OverlayToggle(false))} /> }
         </Fragment>

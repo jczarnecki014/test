@@ -12,8 +12,6 @@ const ChildrenForm = ({changeFormMode,AddChildrenToList}) => {
     const ChildrenInputs = useSelector(state => state.addPatientForm.childrenInputs)
     const dispach = useDispatch()
 
-    console.log(ChildrenInputs)
-
     const FormIsValid = ChildrenInputs.firstName.isValid && 
                         ChildrenInputs.lastName.isValid && 
                         ChildrenInputs.birthDay.isValid && 
